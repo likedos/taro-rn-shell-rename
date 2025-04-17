@@ -1,6 +1,6 @@
+.idea
+lib
 node_modules
 npm-debug.log
-lib
-yarn-error.log
 yarn-error.log
 .env

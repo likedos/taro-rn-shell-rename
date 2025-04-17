@@ -4,8 +4,8 @@ env:
   FORCE_COLOR: true
 
 on:
-  push:
-    branches: [master]
+#  push:
+#    branches: [master]
   pull_request:
     branches: [master]
 

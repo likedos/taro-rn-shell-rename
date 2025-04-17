@@ -44,11 +44,17 @@ program
     `Path and content string that can be used in replacing folders, files and their content. Make sure it doesn't include any special characters.`
   )
   .option('--skipGitStatusCheck', 'Skip git repo status check')
+  .option('-c, --check-update', 'Check for package updates and exit')
   .action(async newName => {
+    const options = program.opts();
+
+    const checkUpdate = options.checkUpdate;
+    if (checkUpdate) {
+      return checkPackageUpdate();
+    }
+
     validateCreation();
     validateGitRepo();
-
-    const options = program.opts();
 
     if (!options.skipGitStatusCheck) {
       checkGitRepoStatus();
@@ -131,7 +137,6 @@ program
     cleanBuilds();
     showSuccessMessages(newName);
     gitStageChanges();
-    checkPackageUpdate();
   });
 
 // If no arguments are passed, show help
@@ -140,4 +145,4 @@ if (!process.argv.slice(2).length) {
   process.exit();
 }
 
-program.parseAsync(process.argv);
+program.parse(process.argv);

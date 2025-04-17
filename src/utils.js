@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import cheerio from 'cheerio';
+import { load } from 'cheerio';
 import * as dotenv from 'dotenv';
 import fs from 'fs';
 import { globbySync } from 'globby';
@@ -52,6 +52,7 @@ export const validateCreation = () => {
   const fileExists =
     fs.existsSync(iosInfoPlistFullPath) && fs.existsSync(androidValuesStringsFullPath);
 
+  console.log(APP_PATH);
   if (!fileExists) {
     console.log('Directory should be created using "react-native init".');
     process.exit();
@@ -163,7 +164,7 @@ export const validateNewBundleID = (newBundleID, platforms = []) => {
 
 const getElementFromXml = ({ filepath, selector }) => {
   const xml = fs.readFileSync(filepath, 'utf8');
-  const $ = cheerio.load(xml, { xmlMode: true, decodeEntities: false });
+  const $ = load(xml, { xmlMode: true, decodeEntities: false });
 
   return $(selector);
 };
@@ -203,7 +204,7 @@ export const getAndroidCurrentBundleID = () => {
   // parse android/app/build.gradle
   const gradleFile = path.join(APP_PATH, 'android', 'app', 'build.gradle');
   const gradleFileContent = fs.readFileSync(gradleFile, 'utf8');
-  const bundleIDFromGradle = gradleFileContent.match(/applicationId\s+['"](.+)['"]/)[1];
+  const bundleIDFromGradle = gradleFileContent.match(/applicationId\s+['"]?(.+)['"]?/)[1];
 
   if (bundleIDFromGradle) {
     return bundleIDFromGradle;
@@ -338,7 +339,7 @@ export const updateIosFilesContent = async ({
 };
 
 const updateElementInXml = async ({ filepath, selector, text }) => {
-  const $ = cheerio.load(fs.readFileSync(filepath, 'utf8'), {
+  const $ = load(fs.readFileSync(filepath, 'utf8'), {
     xmlMode: true,
     decodeEntities: false,
   });
@@ -409,8 +410,14 @@ export const updateAndroidFilesContentBundleID = async ({
   await updateFilesContent(filesContentOptions);
 };
 
-const getJsonContent = jsonFile => {
-  return JSON.parse(fs.readFileSync(path.join(APP_PATH, jsonFile), 'utf8'));
+const getJsonContent = (jsonFile, failback) => {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(APP_PATH, jsonFile), 'utf8'));
+  } catch (e) {
+    console.log(chalk.yellow(`[WARN] Error reading ${jsonFile}: ${e.message}, use default value.`));
+
+    return failback || {};
+  }
 };
 
 export const updateOtherFilesContent = async ({
@@ -421,7 +428,18 @@ export const updateOtherFilesContent = async ({
   newAndroidBundleID,
   newIosBundleID,
 }) => {
-  const appJsonContent = getJsonContent(appJson);
+  console.log({
+    newName,
+    currentPathContentStr,
+    newPathContentStr,
+    currentIosName,
+    newAndroidBundleID,
+    newIosBundleID,
+  });
+  const appJsonContent = getJsonContent(appJson, {
+    name: newAndroidBundleID,
+    displayName: newName,
+  });
   const packageJsonContent = getJsonContent(packageJson);
 
   const filesContentOptions = getOtherUpdateFilesContentOptions({
