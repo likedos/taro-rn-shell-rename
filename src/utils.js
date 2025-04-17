@@ -52,7 +52,6 @@ export const validateCreation = () => {
   const fileExists =
     fs.existsSync(iosInfoPlistFullPath) && fs.existsSync(androidValuesStringsFullPath);
 
-  console.log(APP_PATH);
   if (!fileExists) {
     console.log('Directory should be created using "react-native init".');
     process.exit();
@@ -428,14 +427,6 @@ export const updateOtherFilesContent = async ({
   newAndroidBundleID,
   newIosBundleID,
 }) => {
-  console.log({
-    newName,
-    currentPathContentStr,
-    newPathContentStr,
-    currentIosName,
-    newAndroidBundleID,
-    newIosBundleID,
-  });
   const appJsonContent = getJsonContent(appJson, {
     name: newAndroidBundleID,
     displayName: newName,
