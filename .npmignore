@@ -12,3 +12,6 @@ jest.config.js
 LICENSE
 package.json
 .env
+.idea
+.npmrc
+.Ds_Store
